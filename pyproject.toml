@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling", "uv-dynamic-versioning>=0.7.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "ai-graph"
+dynamic = ["version"]
+description = "AI Graph framework for building processing pipelines"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Mohammad Sina Allahkaram", email = "msinamsina@gmail.com"},
+]
+keywords = ["ai", "graph", "pipeline", "processing", "framework"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "opencv-python>=4.11.0.86",
+    "tqdm>=4.64.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ai-graph/ai-graph"
+Repository = "https://github.com/ai-graph/ai-graph.git"
+Issues = "https://github.com/ai-graph/ai-graph/issues"
+
+[tool.hatch.version]
+source = "uv-dynamic-versioning"
+
+[tool.hatch.build.targets.wheel]
+packages = ["ai_graph"]
+
+[dependency-groups]
+dev = [
+    "commitizen>=3.31.0",
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=22.0.0",
+    "isort>=5.10.0",
+    "flake8>=5.0.0",
+    "mypy>=0.991",
+]
+test = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+]
