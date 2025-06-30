@@ -20,7 +20,7 @@ class ForEachStep(BasePipelineStep):
         items_key: Optional[str] = None,
         iterations: Optional[int] = None,
         results_key: str = "foreach_results",
-        name: str = None,
+        name: Optional[str] = None,
     ):
         """Initialize a ForEach step.
 
@@ -55,7 +55,7 @@ class ForEachStep(BasePipelineStep):
         self.sub_pipeline.add_step(step)
         return self
 
-    def _get_items(self, data: Dict[str, Any]) -> Iterable:
+    def _get_items(self, data: Dict[str, Any]) -> Iterable[Any]:
         """Get items to iterate over from input data or generate range.
 
         Args:
@@ -65,7 +65,11 @@ class ForEachStep(BasePipelineStep):
             Iterable of items to process or range of iteration counts.
         """
         if self.items_key is not None and self.items_key in data:
-            return data[self.items_key]
+            items = data[self.items_key]
+            if hasattr(items, "__iter__") and not isinstance(items, str):
+                return items  # type: ignore[no-any-return]
+            else:
+                return [items]  # Wrap single item in list
         return range(self.iterations or 0)
 
     def _process_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -80,10 +84,20 @@ class ForEachStep(BasePipelineStep):
         items = self._get_items(data)
         results = []
 
+        # Calculate total for progress bar
+        if self.items_key is None:
+            total = self.iterations
+        else:
+            try:
+                total = len(items)  # type: ignore
+            except TypeError:
+                # If items is not sized, we can't show progress
+                total = None
+
         # print tqdm progress bar for the iterations and items
         for i, item in tqdm(
             enumerate(items),
-            total=self.iterations if self.items_key is None else len(items),
+            total=total,
             desc=f"Processing {self.name}",
             unit="item",
         ):

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 __all__ = [
     "BasePipelineStep",
@@ -12,7 +12,7 @@ class BasePipelineStep(ABC):
     Each pipeline step can process input data and pass it to the next step.
     """
 
-    def __init__(self, name: str = None):
+    def __init__(self, name: Optional[str] = None):
         """
         Initialize a pipeline step.
 
@@ -20,7 +20,7 @@ class BasePipelineStep(ABC):
             name (str, optional): A descriptive name for this pipeline step.
         """
         self.name = name or self.__class__.__name__
-        self._next_step = None
+        self._next_step: Optional["BasePipelineStep"] = None
 
     def set_next(self, step: "BasePipelineStep") -> "BasePipelineStep":
         """
@@ -71,7 +71,7 @@ class AddKeyStep(BasePipelineStep):
     This is useful for augmenting data before passing it to the next step.
     """
 
-    def __init__(self, key: str, value: Any, name: str = None):
+    def __init__(self, key: str, value: Any, name: Optional[str] = None):
         """
         Initialize the step with the key and value to be added.
 
@@ -95,7 +95,7 @@ class DelKeyStep(BasePipelineStep):
     This is useful for cleaning up data before passing it to the next step.
     """
 
-    def __init__(self, key: str, name: str = None):
+    def __init__(self, key: str, name: Optional[str] = None):
         """
         Initialize the step with the key to be deleted.
 

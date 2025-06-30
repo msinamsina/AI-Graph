@@ -14,7 +14,9 @@ __all__ = ["Pipeline"]
 class Pipeline:
     """Class that manages the pipeline of processing steps."""
 
-    def __init__(self, name, first_step: Optional[BasePipelineStep] = None):
+    def __init__(
+        self, name: Optional[str], first_step: Optional[BasePipelineStep] = None
+    ):
         """
         Initialize the pipeline.
 
