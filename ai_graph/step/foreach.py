@@ -1,7 +1,6 @@
 """ForEach pipeline implementation using Chain of Responsibility pattern."""
 
-from typing import (Any, Callable, Dict, Iterable, List, Optional, TypeVar,
-                    Union)
+from typing import Any, Dict, Iterable, Optional
 
 from tqdm import tqdm
 

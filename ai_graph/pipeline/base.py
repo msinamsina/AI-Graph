@@ -3,7 +3,6 @@ This module provides the core infrastructure for creating processing pipelines
 for phase detection in eye surgeries.
 """
 
-from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Optional
 
 from ..step.base import BasePipelineStep

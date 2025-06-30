@@ -8,7 +8,8 @@ from ai_graph.step.base import AddKeyStep, BasePipelineStep, DelKeyStep
 class TestBasePipelineStep:
     """
     Test class for BasePipelineStep.
-    This class contains tests for the BasePipelineStep class, which is a base class for pipeline steps in the AI Graph framework.
+    This class contains tests for the BasePipelineStep class,
+    which is a base class for pipeline steps in the AI Graph framework.
     """
 
     @pytest.fixture

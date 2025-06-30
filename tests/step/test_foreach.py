@@ -9,7 +9,8 @@ from ai_graph.step.foreach import ForEachStep
 class TestForEachStep:
     """
     Test class for ForEachStep.
-    This class contains tests for the ForEachStep class, which processes each item in a collection or runs a fixed number of iterations in the AI Graph framework.
+    This class contains tests for the ForEachStep class,
+    which processes each item in a collection or runs a fixed number of iterations in the AI Graph framework.
     """
 
     @pytest.fixture

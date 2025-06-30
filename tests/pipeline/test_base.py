@@ -9,7 +9,8 @@ from ai_graph.step.base import BasePipelineStep
 class TestPipeline:
     """
     Test class for Pipeline.
-    This class contains tests for the Pipeline class, which manages the pipeline of processing steps in the AI Graph framework.
+    This class contains tests for the Pipeline class,
+    which manages the pipeline of processing steps in the AI Graph framework.
     """
 
     @pytest.fixture
