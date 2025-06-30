@@ -1,7 +1,9 @@
-import pytest
 from unittest.mock import MagicMock, patch
-from ai_graph.step.foreach import ForEachStep
+
+import pytest
+
 from ai_graph.step.base import BasePipelineStep
+from ai_graph.step.foreach import ForEachStep
 
 
 class TestForEachStep:

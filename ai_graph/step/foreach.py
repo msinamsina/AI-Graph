@@ -1,9 +1,12 @@
 """ForEach pipeline implementation using Chain of Responsibility pattern."""
 
-from typing import Any, Dict, List, Optional, Iterable, Callable, Union, TypeVar
-from .base import BasePipelineStep
-from ..pipeline.base import Pipeline
+from typing import (Any, Callable, Dict, Iterable, List, Optional, TypeVar,
+                    Union)
+
 from tqdm import tqdm
+
+from ..pipeline.base import Pipeline
+from .base import BasePipelineStep
 
 
 class ForEachStep(BasePipelineStep):

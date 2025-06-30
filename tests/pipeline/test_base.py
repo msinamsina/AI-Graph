@@ -1,5 +1,7 @@
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
+
 from ai_graph.pipeline.base import Pipeline
 from ai_graph.step.base import BasePipelineStep
 

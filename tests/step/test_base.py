@@ -1,6 +1,8 @@
-import pytest
 from unittest.mock import MagicMock
-from ai_graph.step.base import BasePipelineStep, AddKeyStep, DelKeyStep
+
+import pytest
+
+from ai_graph.step.base import AddKeyStep, BasePipelineStep, DelKeyStep
 
 
 class TestBasePipelineStep:

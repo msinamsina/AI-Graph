@@ -4,7 +4,8 @@ for phase detection in eye surgeries.
 """
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, List, Optional
+
 from ..step.base import BasePipelineStep
 
 # set __all__ to control what gets imported with 'from module import *'
