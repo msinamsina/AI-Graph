@@ -77,22 +77,28 @@ class TestPipeline:
             Test that the add_step method adds a step to an empty pipeline correctly.
             """
             result = pipeline.add_step(mock_step)
-            
+
             assert result == pipeline  # Method should return self for chaining
             assert pipeline.first_step == mock_step
             assert pipeline.steps == [mock_step]
 
-        def test_add_step_to_pipeline_with_existing_step(self, pipeline_with_step, mock_step):
+        def test_add_step_to_pipeline_with_existing_step(
+            self, pipeline_with_step, mock_step
+        ):
             """
             Test that the add_step method adds a step to a pipeline with existing steps.
             """
             new_step = MagicMock(spec=BasePipelineStep)
             new_step.name = "NewMockStep"
-            
+
             result = pipeline_with_step.add_step(new_step)
-            
-            assert result == pipeline_with_step  # Method should return self for chaining
-            assert pipeline_with_step.first_step == mock_step  # First step should remain unchanged
+
+            assert (
+                result == pipeline_with_step
+            )  # Method should return self for chaining
+            assert (
+                pipeline_with_step.first_step == mock_step
+            )  # First step should remain unchanged
             assert pipeline_with_step.steps == [mock_step, new_step]
             mock_step.set_next.assert_called_once_with(new_step)
 
@@ -103,9 +109,9 @@ class TestPipeline:
             step1 = MagicMock(spec=BasePipelineStep)
             step2 = MagicMock(spec=BasePipelineStep)
             step3 = MagicMock(spec=BasePipelineStep)
-            
+
             result = pipeline.add_step(step1).add_step(step2).add_step(step3)
-            
+
             assert result == pipeline
             assert pipeline.first_step == step1
             assert pipeline.steps == [step1, step2, step3]
@@ -123,7 +129,7 @@ class TestPipeline:
             Test that the process method raises ValueError when pipeline has no steps.
             """
             data = {"key": "value"}
-            
+
             with pytest.raises(ValueError, match="Pipeline has no steps"):
                 pipeline.process(data)
 
@@ -134,9 +140,9 @@ class TestPipeline:
             data = {"input": "data"}
             expected_output = {"output": "processed_data"}
             mock_step.process.return_value = expected_output
-            
+
             result = pipeline_with_step.process(data)
-            
+
             assert result == expected_output
             mock_step.process.assert_called_once_with(data)
 
@@ -147,37 +153,42 @@ class TestPipeline:
             # Create mock steps
             step1 = MagicMock(spec=BasePipelineStep)
             step2 = MagicMock(spec=BasePipelineStep)
-            
+
             # Set up the pipeline
             pipeline.add_step(step1).add_step(step2)
-            
+
             # Set up mock returns
             intermediate_data = {"intermediate": "data"}
             final_data = {"final": "data"}
             step1.process.return_value = final_data
-            
+
             input_data = {"input": "data"}
-            
+
             result = pipeline.process(input_data)
-            
+
             assert result == final_data
             step1.process.assert_called_once_with(input_data)
             # Note: step2.process is not called directly since step1.process handles the chain
 
-        @pytest.mark.parametrize("data", [
-            {},
-            {"key": "value"},
-            {"multiple": "keys", "in": "dict"},
-            {"nested": {"dict": {"with": "values"}}}
-        ])
-        def test_process_with_various_data_types(self, pipeline_with_step, mock_step, data):
+        @pytest.mark.parametrize(
+            "data",
+            [
+                {},
+                {"key": "value"},
+                {"multiple": "keys", "in": "dict"},
+                {"nested": {"dict": {"with": "values"}}},
+            ],
+        )
+        def test_process_with_various_data_types(
+            self, pipeline_with_step, mock_step, data
+        ):
             """
             Test that the process method handles various data types correctly.
             """
             expected_output = {**data, "processed": True}
             mock_step.process.return_value = expected_output
-            
+
             result = pipeline_with_step.process(data)
-            
+
             assert result == expected_output
             mock_step.process.assert_called_once_with(data)

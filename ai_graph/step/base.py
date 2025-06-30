@@ -1,10 +1,10 @@
 from abc import ABC, abstractmethod
 from typing import Any, Dict
 
-
 __all__ = [
     "PipelineStep",
 ]
+
 
 class BasePipelineStep(ABC):
     """Abstract base class for pipeline steps in a Chain of Responsibility pattern.

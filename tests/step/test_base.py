@@ -2,6 +2,7 @@ import pytest
 from unittest.mock import MagicMock
 from ai_graph.step.base import BasePipelineStep, AddKeyStep, DelKeyStep
 
+
 class TestBasePipelineStep:
     """
     Test class for BasePipelineStep.
@@ -15,8 +16,10 @@ class TestBasePipelineStep:
             Test class for BasePipelineStep.
             This class is used to create an instance of BasePipelineStep for testing purposes.
             """
+
             def _process_step(self, data):
                 return super()._process_step(data)
+
         return BasePipelineStepTest()
 
     class TestDunderInit:
@@ -46,7 +49,7 @@ class TestBasePipelineStep:
             next_step = MagicMock(spec=BasePipelineStep)
             base_step.set_next(next_step)
             assert base_step._next_step == next_step
-    
+
     class TestProcess:
         """
         Test class for the process method of BasePipelineStep.
@@ -63,7 +66,7 @@ class TestBasePipelineStep:
             result = base_step.process(data)
             assert result == data
             base_step._process_step.assert_called_once_with(data)
-        
+
         def test_process_with_next_step(self, base_step):
             """
             Test that the process method processes data through the next step in the pipeline.
@@ -107,11 +110,9 @@ class TestAddKeyStep:
         This class contains tests for processing data by adding a key-value pair.
         """
 
-        @pytest.mark.parametrize("data", [
-            {},
-            {"existing_key": "existing_value"},
-            {"test_key": "old_value"}
-        ])
+        @pytest.mark.parametrize(
+            "data", [{}, {"existing_key": "existing_value"}, {"test_key": "old_value"}]
+        )
         def test_process_step(self, data):
             """
             Test that the _process_step method adds the key-value pair to the data.
@@ -146,11 +147,14 @@ class TestDelKeyStep:
         This class contains tests for processing data by deleting a key.
         """
 
-        @pytest.mark.parametrize("data, expected", [
-            ({"test_key": "test_value"}, {}),
-            ({"another_key": "another_value"}, {"another_key": "another_value"}),
-            ({}, {})
-        ])
+        @pytest.mark.parametrize(
+            "data, expected",
+            [
+                ({"test_key": "test_value"}, {}),
+                ({"another_key": "another_value"}, {"another_key": "another_value"}),
+                ({}, {}),
+            ],
+        )
         def test_process_step(self, data, expected):
             """
             Test that the _process_step method deletes the key from the data.

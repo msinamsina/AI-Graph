@@ -81,7 +81,9 @@ class TestForEachStep:
             """
             Test that the __init__ method raises ValueError when neither items_key nor iterations is provided.
             """
-            with pytest.raises(ValueError, match="Either items_key or iterations must be provided"):
+            with pytest.raises(
+                ValueError, match="Either items_key or iterations must be provided"
+            ):
                 ForEachStep()
 
     class TestAddSubStep:
@@ -95,8 +97,10 @@ class TestForEachStep:
             Test that the add_sub_step method adds a step to the sub-pipeline correctly.
             """
             result = foreach_step_with_items.add_sub_step(mock_sub_step)
-            
-            assert result == foreach_step_with_items  # Method should return self for chaining
+
+            assert (
+                result == foreach_step_with_items
+            )  # Method should return self for chaining
             assert mock_sub_step in foreach_step_with_items.sub_pipeline.steps
 
         def test_add_multiple_sub_steps_chaining(self, foreach_step_with_items):
@@ -106,9 +110,13 @@ class TestForEachStep:
             step1 = MagicMock(spec=BasePipelineStep)
             step2 = MagicMock(spec=BasePipelineStep)
             step3 = MagicMock(spec=BasePipelineStep)
-            
-            result = foreach_step_with_items.add_sub_step(step1).add_sub_step(step2).add_sub_step(step3)
-            
+
+            result = (
+                foreach_step_with_items.add_sub_step(step1)
+                .add_sub_step(step2)
+                .add_sub_step(step3)
+            )
+
             assert result == foreach_step_with_items
             assert step1 in foreach_step_with_items.sub_pipeline.steps
             assert step2 in foreach_step_with_items.sub_pipeline.steps
@@ -144,14 +152,19 @@ class TestForEachStep:
             items = foreach_step_with_iterations._get_items(data)
             assert list(items) == [0, 1, 2]
 
-        @pytest.mark.parametrize("items", [
-            [],
-            [1],
-            [1, 2, 3],
-            ["a", "b", "c", "d"],
-            [{"key": "value1"}, {"key": "value2"}]
-        ])
-        def test_get_items_with_various_item_types(self, foreach_step_with_items, items):
+        @pytest.mark.parametrize(
+            "items",
+            [
+                [],
+                [1],
+                [1, 2, 3],
+                ["a", "b", "c", "d"],
+                [{"key": "value1"}, {"key": "value2"}],
+            ],
+        )
+        def test_get_items_with_various_item_types(
+            self, foreach_step_with_items, items
+        ):
             """
             Test that _get_items handles various types of items correctly.
             """
@@ -165,123 +178,140 @@ class TestForEachStep:
         This class contains tests for processing data through the foreach loop.
         """
 
-        @patch('ai_graph.step.foreach.tqdm')
-        def test_process_step_with_items_no_sub_steps(self, mock_tqdm, foreach_step_with_items):
+        @patch("ai_graph.step.foreach.tqdm")
+        def test_process_step_with_items_no_sub_steps(
+            self, mock_tqdm, foreach_step_with_items
+        ):
             """
             Test that _process_step processes items correctly when no sub-steps are configured.
             """
             # Mock tqdm to return the enumerated items as expected
             mock_tqdm.return_value = [(0, 1), (1, 2), (2, 3)]
             data = {"items": [1, 2, 3]}
-            
+
             result = foreach_step_with_items._process_step(data)
-            
+
             assert result["results"] == []
             assert "items" in result  # Original data should be preserved
 
-        @patch('ai_graph.step.foreach.tqdm')
-        def test_process_step_with_items_and_sub_steps(self, mock_tqdm, foreach_step_with_items, mock_sub_step):
+        @patch("ai_graph.step.foreach.tqdm")
+        def test_process_step_with_items_and_sub_steps(
+            self, mock_tqdm, foreach_step_with_items, mock_sub_step
+        ):
             """
             Test that _process_step processes items through sub-pipeline correctly.
             """
             # Setup mock tqdm to return enumerated items
             mock_tqdm.return_value = [(0, 10), (1, 20), (2, 30)]
-            
+
             # Add sub-step and configure its behavior
             foreach_step_with_items.add_sub_step(mock_sub_step)
-            foreach_step_with_items.sub_pipeline.process = MagicMock(side_effect=[
-                {"processed": "item1", "_current_item": 10, "_iteration_index": 0},
-                {"processed": "item2", "_current_item": 20, "_iteration_index": 1},
-                {"processed": "item3", "_current_item": 30, "_iteration_index": 2}
-            ])
-            
+            foreach_step_with_items.sub_pipeline.process = MagicMock(
+                side_effect=[
+                    {"processed": "item1", "_current_item": 10, "_iteration_index": 0},
+                    {"processed": "item2", "_current_item": 20, "_iteration_index": 1},
+                    {"processed": "item3", "_current_item": 30, "_iteration_index": 2},
+                ]
+            )
+
             data = {"items": [10, 20, 30]}
             result = foreach_step_with_items._process_step(data)
-            
+
             assert len(result["results"]) == 3
             assert result["results"][0]["processed"] == "item1"
             assert result["results"][1]["processed"] == "item2"
             assert result["results"][2]["processed"] == "item3"
 
-        @patch('ai_graph.step.foreach.tqdm')
-        def test_process_step_with_iterations(self, mock_tqdm, foreach_step_with_iterations, mock_sub_step):
+        @patch("ai_graph.step.foreach.tqdm")
+        def test_process_step_with_iterations(
+            self, mock_tqdm, foreach_step_with_iterations, mock_sub_step
+        ):
             """
             Test that _process_step processes iterations correctly.
             """
             mock_tqdm.return_value = [(0, 0), (1, 1), (2, 2)]
-            
+
             foreach_step_with_iterations.add_sub_step(mock_sub_step)
-            foreach_step_with_iterations.sub_pipeline.process = MagicMock(side_effect=[
-                {"iteration": 0, "_current_item": 0, "_iteration_index": 0},
-                {"iteration": 1, "_current_item": 1, "_iteration_index": 1},
-                {"iteration": 2, "_current_item": 2, "_iteration_index": 2}
-            ])
-            
+            foreach_step_with_iterations.sub_pipeline.process = MagicMock(
+                side_effect=[
+                    {"iteration": 0, "_current_item": 0, "_iteration_index": 0},
+                    {"iteration": 1, "_current_item": 1, "_iteration_index": 1},
+                    {"iteration": 2, "_current_item": 2, "_iteration_index": 2},
+                ]
+            )
+
             data = {"input": "data"}
             result = foreach_step_with_iterations._process_step(data)
-            
+
             assert len(result["results"]) == 3
             assert result["results"][0]["iteration"] == 0
             assert result["results"][1]["iteration"] == 1
             assert result["results"][2]["iteration"] == 2
 
-        @patch('ai_graph.step.foreach.tqdm')
-        def test_process_step_iteration_context(self, mock_tqdm, foreach_step_with_items, mock_sub_step):
+        @patch("ai_graph.step.foreach.tqdm")
+        def test_process_step_iteration_context(
+            self, mock_tqdm, foreach_step_with_items, mock_sub_step
+        ):
             """
             Test that _process_step creates correct iteration context for sub-pipeline.
             """
             mock_tqdm.return_value = [(0, "a"), (1, "b")]
-            
+
             foreach_step_with_items.add_sub_step(mock_sub_step)
-            
+
             # Capture the data passed to sub-pipeline
             captured_data = []
+
             def capture_process(data):
                 captured_data.append(data.copy())
                 return {"result": "processed"}
-            
-            foreach_step_with_items.sub_pipeline.process = MagicMock(side_effect=capture_process)
-            
+
+            foreach_step_with_items.sub_pipeline.process = MagicMock(
+                side_effect=capture_process
+            )
+
             data = {"items": ["a", "b"], "original": "data"}
             foreach_step_with_items._process_step(data)
-            
+
             # Check first iteration context
             assert captured_data[0]["_current_item"] == "a"
             assert captured_data[0]["_iteration_index"] == 0
             assert captured_data[0]["original"] == "data"
-            
+
             # Check second iteration context
             assert captured_data[1]["_current_item"] == "b"
             assert captured_data[1]["_iteration_index"] == 1
             assert captured_data[1]["original"] == "data"
 
-        @patch('ai_graph.step.foreach.tqdm')
+        @patch("ai_graph.step.foreach.tqdm")
         def test_process_step_custom_results_key(self, mock_tqdm, mock_sub_step):
             """
             Test that _process_step uses custom results key correctly.
             """
             mock_tqdm.return_value = [(0, 1), (1, 2)]
-            
+
             step = ForEachStep(items_key="items", results_key="custom_results")
             step.add_sub_step(mock_sub_step)
             step.sub_pipeline.process = MagicMock(return_value={"processed": True})
-            
+
             data = {"items": [1, 2]}
             result = step._process_step(data)
-            
+
             assert "custom_results" in result
             assert len(result["custom_results"]) == 2
 
-        @patch('ai_graph.step.foreach.tqdm')
-        def test_process_step_preserves_original_data(self, mock_tqdm, foreach_step_with_items):
+        @patch("ai_graph.step.foreach.tqdm")
+        def test_process_step_preserves_original_data(
+            self, mock_tqdm, foreach_step_with_items
+        ):
             """
             Test that _process_step preserves original data in the result.
             """
             mock_tqdm.return_value = []
-            
+
             data = {"items": [], "preserve": "this", "and": "this too"}
             result = foreach_step_with_items._process_step(data)
-            
+
             assert result["preserve"] == "this"
             assert result["and"] == "this too"
             assert result["results"] == []

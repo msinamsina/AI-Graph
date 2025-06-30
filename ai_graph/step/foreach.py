@@ -18,7 +18,7 @@ class ForEachStep(BasePipelineStep):
         items_key: Optional[str] = None,
         iterations: Optional[int] = None,
         results_key: str = "foreach_results",
-        name: str = None
+        name: str = None,
     ):
         """Initialize a ForEach step.
 
@@ -79,10 +79,12 @@ class ForEachStep(BasePipelineStep):
         results = []
 
         # print tqdm progress bar for the iterations and items
-        for i, item in tqdm(enumerate(items),
-                            total=self.iterations if self.items_key is None else len(items),
-                            desc=f"Processing {self.name}",
-                            unit="item"):
+        for i, item in tqdm(
+            enumerate(items),
+            total=self.iterations if self.items_key is None else len(items),
+            desc=f"Processing {self.name}",
+            unit="item",
+        ):
             # Create iteration context with original data and current item
             iteration_data = data.copy()
             iteration_data["_current_item"] = item

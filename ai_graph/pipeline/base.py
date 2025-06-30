@@ -8,9 +8,7 @@ from typing import Any, Dict, Optional, List
 from ..step.base import BasePipelineStep
 
 # set __all__ to control what gets imported with 'from module import *'
-__all__ = [
-    "Pipeline"
-]
+__all__ = ["Pipeline"]
 
 
 class Pipeline:
