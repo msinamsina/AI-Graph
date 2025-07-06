@@ -52,8 +52,18 @@ dev = [
     "flake8>=5.0.0",
     "mypy>=0.991",
     "twine>=6.1.0",
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autodoc-typehints>=1.17.0",
+    "myst-parser>=0.18.0",
 ]
 test = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
+]
+docs = [
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "sphinx-autodoc-typehints>=1.17.0",
+    "myst-parser>=0.18.0",
 ]
