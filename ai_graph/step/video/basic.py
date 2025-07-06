@@ -28,7 +28,23 @@ class OpenVideoCaptureStep(BasePipelineStep):
         self.source = source
 
     def _process_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Open the video capture and return the capture object."""
+        """
+        Open the video capture and return the capture object.
+
+        This method opens a video capture device or file and extracts metadata
+        including frame count, FPS, dimensions, and format information.
+
+        Args:
+            data (Dict[str, Any]): Input data dictionary.
+
+        Returns:
+            Dict[str, Any]: Updated data dictionary with video_capture containing:
+                - capture: The OpenCV VideoCapture object
+                - metadata: Dictionary with video properties (frame_count, fps, width, height, etc.)
+
+        Raises:
+            ValueError: If the video source cannot be opened.
+        """
         cap = cv2.VideoCapture(self.source)
         if not cap.isOpened():
             raise ValueError(f"Could not open video source: {self.source}")
@@ -49,7 +65,23 @@ class OpenVideoCaptureStep(BasePipelineStep):
 
 
 class ReadVideoFrameStep(BasePipelineStep):
-    """Pipeline step to read a frame from the video capture device."""
+    """
+    Pipeline step to read a frame from the video capture device.
+
+    This step reads the next frame from an opened video capture device or file.
+    It supports both sequential reading and seeking to specific frame numbers.
+
+    Examples:
+        >>> # Reading sequential frames
+        >>> step = ReadVideoFrameStep()
+        >>> data = {'video_capture': {'capture': cap, 'metadata': metadata}}
+        >>> result = step.process(data)
+        >>> frame = result['frame']
+
+        >>> # Reading a specific frame
+        >>> data = {'video_capture': {'capture': cap, 'metadata': metadata}, 'frame_num': 100}
+        >>> result = step.process(data)
+    """
 
     def __init__(self, name: Optional[str] = None):
         """
@@ -61,7 +93,21 @@ class ReadVideoFrameStep(BasePipelineStep):
         super().__init__(name or "ReadVideoFrame")
 
     def _process_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Read a frame from the video capture object."""
+        """
+        Read a frame from the video capture object.
+
+        Args:
+            data (Dict[str, Any]): Input data containing video_capture object.
+
+        Returns:
+            Dict[str, Any]: Dictionary containing:
+                - frame: The read frame as a numpy array
+                - frame_num: The frame number (int)
+                - timestamp-ms: The timestamp in milliseconds
+
+        Raises:
+            ValueError: If video capture is not initialized, opened, or frame read fails.
+        """
         cap_info = data.get("video_capture")
         cap: Optional[cv2.VideoCapture] = None
         cap_metadata: Optional[Dict[str, Any]] = None
@@ -115,7 +161,18 @@ class ReleaseVideoFrameStep(BasePipelineStep):
 
 
 class ReadFrameFromFileStep(BasePipelineStep):
-    """Pipeline step to read a frame from a file path."""
+    """
+    Pipeline step to read a frame from a file path.
+
+    This step reads an image file from the filesystem using OpenCV's imread function.
+    It supports all image formats supported by OpenCV including JPEG, PNG, BMP, TIFF, etc.
+
+    Examples:
+        >>> step = ReadFrameFromFileStep()
+        >>> data = {'frame_path': '/path/to/image.jpg'}
+        >>> result = step.process(data)
+        >>> frame = result['frame']  # numpy array containing the image
+    """
 
     def __init__(self, name: Optional[str] = None):
         """
@@ -127,7 +184,18 @@ class ReadFrameFromFileStep(BasePipelineStep):
         super().__init__(name or "ReadFrameFromFile")
 
     def _process_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Read a frame from the specified file path."""
+        """
+        Read a frame from the specified file path.
+
+        Args:
+            data (Dict[str, Any]): Input data containing frame_path.
+
+        Returns:
+            Dict[str, Any]: Updated data dictionary with the loaded frame.
+
+        Raises:
+            ValueError: If no frame path is provided or frame reading fails.
+        """
         if "frame_path" not in data:
             raise ValueError("No frame path provided in data.")
 

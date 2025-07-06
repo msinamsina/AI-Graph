@@ -23,6 +23,7 @@ version = "0.1.0"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.viewcode",
     "sphinx.ext.napoleon",
     "sphinx.ext.githubpages",
@@ -52,7 +53,6 @@ html_theme_options = {
     "analytics_id": "",
     "analytics_anonymize_ip": False,
     "logo_only": False,
-    "display_version": True,
     "prev_next_buttons_location": "bottom",
     "style_external_links": False,
     "vcs_pageview_mode": "",
@@ -87,6 +87,10 @@ autodoc_default_options = {
     "exclude-members": "__weakref__",
 }
 
+# -- Options for autosummary ------------------------------------------------
+autosummary_generate = True
+autosummary_generate_overwrite = True
+
 # -- Options for Napoleon ---------------------------------------------------
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
@@ -110,7 +114,8 @@ todo_include_todos = True
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
-    "opencv": ("https://docs.opencv.org/4.x/", None),
+    # OpenCV documentation does not provide a working objects.inv file
+    # "opencv": ("https://docs.opencv.org/4.x/", None),
 }
 
 # -- Options for MyST parser ------------------------------------------------
