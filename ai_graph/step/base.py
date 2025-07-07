@@ -1,3 +1,4 @@
+"""Base classes for pipeline steps."""
 from abc import ABC, abstractmethod
 from typing import Any, Dict, Optional
 
@@ -53,7 +54,8 @@ class BasePipelineStep(ABC):
 
     @abstractmethod
     def _process_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process the current step.
+        """
+        Process the current step.
 
         Must be implemented by concrete pipeline steps.
 
@@ -67,7 +69,9 @@ class BasePipelineStep(ABC):
 
 
 class AddKeyStep(BasePipelineStep):
-    """A simple step that adds a specified key-value pair to the input data.
+    """
+    A simple step that adds a specified key-value pair to the input data.
+
     This is useful for augmenting data before passing it to the next step.
     """
 
@@ -91,7 +95,9 @@ class AddKeyStep(BasePipelineStep):
 
 
 class DelKeyStep(BasePipelineStep):
-    """A simple step that deletes a specified key from the input data.
+    """
+    A simple step that deletes a specified key from the input data.
+
     This is useful for cleaning up data before passing it to the next step.
     """
 

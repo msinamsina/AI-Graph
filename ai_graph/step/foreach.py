@@ -110,6 +110,9 @@ class ForEachStep(BasePipelineStep):
             if self.sub_pipeline.steps:
                 result = self.sub_pipeline.process(iteration_data)
                 results.append(result)
+            else:
+                # If no sub-steps, just append the current item
+                results.append(iteration_data)
 
         # Store results in the output data
         data[self.results_key] = results
