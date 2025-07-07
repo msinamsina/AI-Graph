@@ -59,7 +59,7 @@ html_theme_options = {
     "style_nav_header_background": "#2980B9",
     "collapse_navigation": False,
     "sticky_navigation": True,
-    "navigation_depth": 4,
+    "navigation_depth": 6,
     "includehidden": True,
     "titles_only": False,
 }
