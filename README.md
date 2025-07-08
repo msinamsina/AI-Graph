@@ -183,11 +183,11 @@ class ProcessItemStep(BasePipelineStep):
         # Access current item and iteration index
         current_item = data["_current_item"]
         iteration_index = data["_iteration_index"]
-        
+
         # Process the item
         data["processed_value"] = current_item * 2
         data["position"] = iteration_index
-        
+
         return data
 
 # Create batch processing pipeline
