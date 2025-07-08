@@ -1,4 +1,5 @@
 """Tests for the BasePipelineStep, AddKeyStep, and DelKeyStep classes in the AI Graph framework."""
+
 from unittest.mock import MagicMock
 
 import pytest

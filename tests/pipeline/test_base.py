@@ -1,4 +1,5 @@
 """Tests for ai_graph.pipeline.base module."""
+
 from unittest.mock import MagicMock
 
 import pytest
