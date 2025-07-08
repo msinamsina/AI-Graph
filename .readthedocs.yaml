@@ -20,3 +20,6 @@ sphinx:
 python:
    install:
    - requirements: docs/docs-requirements.txt
+
+   # run the docs/generate_docs.py script to generate the documentation
+   - run: python docs/generate_docs.py
