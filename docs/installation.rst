@@ -42,9 +42,10 @@ Development Installation
 For development, install with development dependencies:
 
 we use uv as package manager.
+
 .. code-block:: bash
 
-   uv pip install -e ".[dev]"
+   uv sync --group dev
 
 
 This will install additional tools for:
@@ -52,7 +53,8 @@ This will install additional tools for:
 - **Testing**: pytest, pytest-cov
 - **Code formatting**: black, isort
 - **Linting**: flake8, mypy
-- **Documentation**: sphinx
+- **Documentation**: sphinx, sphinx-rtd-theme, sphinx-autodoc-typehints, myst-parser
+- **Development**: commitizen, twine, pre-commit, plus test, docs, and lint groups
 
 
 Verification
@@ -113,7 +115,7 @@ It's recommended to use a virtual environment or uv to avoid conflicts with syst
    .. code-block:: bash
 
       uv venv ai-graph-env
-      uv activate ai-graph-env
+      source ai-graph-env/bin/activate
       uv pip install ai-graph
 
 

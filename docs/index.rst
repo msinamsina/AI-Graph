@@ -51,15 +51,29 @@ Basic Usage
 
    # Create a custom step
    class MyStep(BaseStep):
-       def process(self, data):
-           # Your processing logic here
-           return data * 2
+       def process(self, data: dict[str, any]) -> dict[str, any]:
+            """
+            Process data in this step.
 
+            Parameters:
+            -----------
+
+            data (dict): Input data for this step
+
+            key: "input" is an integer that will be processed
+
+            Returns
+            -------
+
+            dict: Processed data
+            """
+            # Example processing logic
+            return {"result": data["input"] * 2}
    # Build and run pipeline
    pipeline = Pipeline()
    pipeline.add_step(MyStep())
-   result = pipeline.run(input_data=5)
-   print(result)  # Output: 10
+   result = pipeline.run(input_data={"input": 5})
+   print(result)  # Output: {"result": 10, "input": 5}
 
 🏗️ **Architecture Overview**
 -----------------------------
@@ -97,14 +111,14 @@ AI-Graph is built around three core concepts:
    :caption: Examples
 
    examples/basic-pipeline
+   notebooks/index
 
 .. toctree::
    :maxdepth: 2
    :caption: Development
 
    contributing
-   changelog
-   roadmap
+
 
 🤝 **Contributing**
 -------------------
