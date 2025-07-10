@@ -110,7 +110,6 @@ AI-Graph is built around three core concepts:
    :maxdepth: 2
    :caption: Examples
 
-   examples/basic-pipeline
    notebooks/index
 
 .. toctree::

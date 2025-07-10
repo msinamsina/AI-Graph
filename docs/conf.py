@@ -35,10 +35,11 @@ extensions = [
     "sphinx_rtd_theme",
     "sphinx_autodoc_typehints",
     "myst_parser",
+    "nbsphinx",
 ]
 
 templates_path = ["_templates"]
-exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md"]
+exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "README.md", "**.ipynb_checkpoints"]
 
 language = "en"
 
@@ -92,20 +93,20 @@ autosummary_generate = True
 autosummary_generate_overwrite = True
 
 # -- Options for Napoleon ---------------------------------------------------
-napoleon_google_docstring = True
-napoleon_numpy_docstring = True
-napoleon_include_init_with_doc = False
-napoleon_include_private_with_doc = False
-napoleon_include_special_with_doc = True
-napoleon_use_admonition_for_examples = False
-napoleon_use_admonition_for_notes = False
-napoleon_use_admonition_for_references = False
-napoleon_use_ivar = False
-napoleon_use_param = True
-napoleon_use_rtype = True
-napoleon_preprocess_types = False
-napoleon_type_aliases = None
-napoleon_attr_annotations = True
+# napoleon_google_docstring = True
+# napoleon_numpy_docstring = True
+# napoleon_include_init_with_doc = False
+# napoleon_include_private_with_doc = False
+# napoleon_include_special_with_doc = True
+# napoleon_use_admonition_for_examples = False
+# napoleon_use_admonition_for_notes = False
+# napoleon_use_admonition_for_references = False
+# napoleon_use_ivar = False
+# napoleon_use_param = True
+# napoleon_use_rtype = True
+# napoleon_preprocess_types = False
+# napoleon_type_aliases = None
+# napoleon_attr_annotations = True
 
 # -- Options for todo extension ---------------------------------------------
 todo_include_todos = True
@@ -117,6 +118,10 @@ intersphinx_mapping = {
     # OpenCV documentation does not provide a working objects.inv file
     # "opencv": ("https://docs.opencv.org/4.x/", None),
 }
+
+# -- Options for nbsphinx extension -----------------------------------------
+# Execute notebooks before building the documentation
+nbsphinx_execute = "always"
 
 # -- Options for MyST parser ------------------------------------------------
 myst_enable_extensions = [

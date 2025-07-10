@@ -223,3 +223,106 @@ For documentation-related questions:
 - Check the [Sphinx documentation](https://www.sphinx-doc.org/)
 - Read the [Read the Docs tutorial](https://docs.readthedocs.io/)
 - Open an issue in the GitHub repository
+
+## 📖 Jupyter Notebooks Integration
+
+The documentation includes Jupyter notebooks that demonstrate the usage of AI-Graph. These notebooks are:
+
+1. **Located in**: `docs/notebooks/`
+2. **Automatically executed** when building documentation
+3. **Tested** using pytest with nbval plugin
+
+### Notebook Structure
+
+- `notebooks/ai_graph_example.ipynb` - Main example notebook copied from `example/`
+- `notebooks/index.rst` - Index file for the notebooks section
+
+### Testing Notebooks
+
+Test all notebooks in the project:
+```bash
+make test-notebooks
+```
+
+Test only documentation notebooks:
+```bash
+make test-docs-nb
+```
+
+Or test manually with pytest:
+```bash
+# Test specific notebook
+pytest --nbval example/ai_graph_example.ipynb -v
+
+# Test with custom configuration
+pytest --nbval -c pytest-notebook.ini example/*.ipynb -v
+```
+
+### Notebook Configuration
+
+- **Execution**: Notebooks are executed during documentation build
+- **Timeout**: 60 seconds per cell
+- **Kernel**: python3
+- **Error handling**: Errors are allowed for demonstration purposes
+
+Key configuration in `conf.py`:
+
+```python
+# Enable nbsphinx for notebook integration
+extensions = [
+    # ... other extensions
+    "nbsphinx",
+]
+
+# Notebook execution settings
+nbsphinx_execute = "always"
+```
+
+### Pytest Configuration
+
+Two pytest configurations are available:
+
+1. **pytest.ini** - Main configuration with full test suite
+2. **pytest-notebook.ini** - Notebook-only testing configuration
+
+## 🚀 Notebook Workflow
+
+1. **Write your notebook** in the `example/` directory
+2. **Copy it** to `docs/notebooks/` when ready for documentation
+3. **Update** `docs/notebooks/index.rst` to include the new notebook
+4. **Test** the notebook: `make test-notebooks`
+5. **Build** documentation: `make html`
+6. **Serve** locally: `make serve`
+
+## 📦 Additional Dependencies for Notebooks
+
+The notebook integration requires additional dependencies:
+
+- **nbsphinx** >= 0.8.0 (for notebook integration)
+- **jupyter** >= 1.0.0
+- **ipykernel** >= 6.0.0
+- **pytest-notebook** >= 0.8.0 (for testing)
+- **nbval** >= 0.10.0 (for notebook validation)
+
+These are already included in the `docs-requirements.txt` file.
+
+## 🐛 Troubleshooting Notebooks
+
+### Common Issues
+
+1. **Notebook not appearing in docs**: Check that it's included in `notebooks/index.rst`
+2. **Execution errors**: Check notebook cells and adjust timeout settings
+3. **Build warnings**: Most warnings about notebook formatting are non-critical
+4. **Missing dependencies**: Ensure all packages in `docs-requirements.txt` are installed
+
+### Debugging
+
+Enable verbose output:
+```bash
+make html SPHINXOPTS="-v"
+```
+
+Check notebook execution:
+```bash
+jupyter nbconvert --execute --to notebook example/ai_graph_example.ipynb
+```

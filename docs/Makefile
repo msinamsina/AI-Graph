@@ -17,6 +17,8 @@ help:
 	@echo "  regenerate-api to regenerate API documentation only"
 	@echo "  serve          to serve the documentation locally"
 	@echo "  clean          to remove build artifacts"
+	@echo "  test-notebooks to test all notebooks in the project"
+
 
 clean:
 	rm -rf $(BUILDDIR)/*
@@ -41,7 +43,11 @@ serve:
 	@echo "Starting documentation server..."
 	sphinx-autobuild -b html "$(SOURCEDIR)" "$(BUILDDIR)" --open-browser --port 8000 --watch "$(SOURCEDIR)" --ignore "api/*" --ignore "_build/*" --ignore "venv/*" --ignore ".git/*"
 
-.PHONY: help clean html api-docs regenerate-api serve
+test-notebooks:
+	@echo "Testing all notebooks in the project..."
+	cd .. && python -m pytest --nbval -c pytest-notebook.ini example/ docs/notebooks/ -v
+
+.PHONY: help clean html api-docs regenerate-api serve test-notebooks
 
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
