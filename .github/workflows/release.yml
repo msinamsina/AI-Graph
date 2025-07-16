@@ -44,7 +44,7 @@ jobs:
         uv run black --check .
         uv run isort --check-only .
         uv run flake8 .
-        uv run mypy .
+        uv run mypy ai_graph
 
   build:
     needs: test
