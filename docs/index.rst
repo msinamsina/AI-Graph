@@ -91,8 +91,8 @@ AI-Graph is built around three core concepts:
    :caption: Getting Started
 
    installation
-   quick-start
-   concepts
+   quick_start.ipynb
+   concepts.ipynb
 
 .. toctree::
    :maxdepth: 2
