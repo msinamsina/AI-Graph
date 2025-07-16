@@ -72,3 +72,19 @@ lint = [
     "flake8>=5.0.0",
     "mypy>=0.991",
 ]
+
+[tool.black]
+line-length = 120
+include = '\.pyi?$'
+extend-exclude = '''
+(
+  ^/docs/.*\.py$
+  | ^/build/
+  | ^/dist/
+  | \.git/
+  | \.tox/
+  | \.venv/
+  | venv/
+  | __pycache__/
+)
+'''
