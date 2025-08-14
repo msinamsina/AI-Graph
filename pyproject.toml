@@ -65,6 +65,7 @@ docs = [
     "nbsphinx>=0.8.0",
     "jupyter>=1.0.0",
     "ipykernel>=6.0.0",
+    "sphinx-autobuild>=2024.10.3",
 ]
 lint = [
     "black>=22.0.0",
