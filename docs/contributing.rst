@@ -67,17 +67,8 @@ We welcome contributions to AI-Graph! This guide will help you get started with 
 
       uv venv .venv
       source .venv/bin/activate
-      uv pip install --group dev
+      uv sync --dev
 
-
-   .. code-block:: bash
-
-      # Create virtual environment
-      python -m venv venv
-      source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-      # Install in development mode
-      pip install -e ".[dev]"
 
 4. **Create a Branch**
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -359,11 +350,19 @@ Documentation contributions are highly valued:
 3. **Examples**: Real-world usage examples
 4. **README**: Project overview and quick start
 
+First ensure the pandoc is installed on you local machine:
+
+.. code-block:: bash
+
+   sudo apt update
+   sudo apt install -y pandoc
+
 To build documentation locally:
 
 .. code-block:: bash
 
    cd docs
+   python generate_docs.py
    make html
    # Open _build/html/index.html in your browser
    # or serve it locally
