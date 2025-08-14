@@ -17,9 +17,12 @@ We welcome contributions to AI-Graph! This guide will help you get started with 
 ----------------------
 
 1. **Fork the Repository**
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
    Fork the AI-Graph repository on GitHub.
 
 2. **Clone Your Fork**
+~~~~~~~~~~~~~~~~~~~~~~
 
    .. code-block:: bash
 
@@ -27,6 +30,45 @@ We welcome contributions to AI-Graph! This guide will help you get started with 
       cd ai-graph
 
 3. **Set Up Development Environment**
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   **Prerequisites**
+
+   To generate docs and serve it locally, you need to have pandoc installed.
+
+   .. code-block:: bash
+
+      sudo apt update
+      sudo apt install -y pandoc
+
+   .. important::
+      We highly recommend using `uv` for managing dependencies
+      and virtual environments. `uv` is a fast Python package
+      manager and virtual environment tool.
+      For more information, see the `uv` `documentation <https://docs.astral.sh/uv/>`_.
+
+      Quick Installation
+
+         .. code-block:: bash
+
+            pipx install uv
+
+
+      Check Installation:
+
+         .. code-block:: bash
+
+            uv --version
+
+
+   **Setup development environment with `uv`**:
+
+   .. code-block:: bash
+
+      uv venv .venv
+      source .venv/bin/activate
+      uv pip install --group dev
+
 
    .. code-block:: bash
 
@@ -38,6 +80,7 @@ We welcome contributions to AI-Graph! This guide will help you get started with 
       pip install -e ".[dev]"
 
 4. **Create a Branch**
+~~~~~~~~~~~~~~~~~~~~~~
 
    .. code-block:: bash
 
@@ -68,6 +111,17 @@ Run all checks:
    flake8 ai_graph tests
    mypy ai_graph
 
+We additinally prepared a pre-commit that help you to do
+this checks automatically when you commite the codes.
+
+Pre-commit Setup
+~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+   pre-commit install
+
+
 Testing
 ~~~~~~~
 
@@ -97,19 +151,31 @@ Example test:
 .. code-block:: python
 
    import pytest
-   from ai_graph.step import BaseStep
 
-   class TestBaseStep:
-       def test_process_returns_correct_result(self):
-           # Arrange
-           step = BaseStep()
-           input_data = "test"
 
-           # Act
-           result = step.process(input_data)
+   class TestClassName:
 
-           # Assert
-           assert result == "test"
+       class TestMethod1:
+         def test_case1(self):
+           assert True
+
+         def test_case2(self):
+           assert True
+
+      class TestMethod2:
+         def test_case1(self):
+           assert True
+
+         def test_case2(self):
+           assert True
+
+   class TestFunctionName:
+
+      def test_case1(self):
+         assert True
+
+      def test_case2(self):
+         assert True
 
 Documentation
 ~~~~~~~~~~~~~
@@ -300,6 +366,8 @@ To build documentation locally:
    cd docs
    make html
    # Open _build/html/index.html in your browser
+   # or serve it locally
+   sphinx-autobuild . _build/html
 
 🎉 **Recognition**
 ------------------
