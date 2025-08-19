@@ -30,9 +30,7 @@ def mock_path_isfile():
 @pytest.fixture
 def video_downsampling_step():
     """Fixture to create a VideoDownsamplingStep instance."""
-    return VideoDownsamplingStep(
-        output_fps=10, output_resolution="640x480", output_format="mp4"
-    )
+    return VideoDownsamplingStep(output_fps=10, output_resolution="640x480", output_format="mp4")
 
 
 def test_check_ffmpeg_availability_success(mock_subprocess_run):
@@ -69,9 +67,7 @@ def test_install_ffmpeg_success(mock_subprocess_run):
         ffmpeg_path, ffprobe_path = install_ffmpeg()
         assert ffmpeg_path == "/path/to/ffmpeg"
         assert ffprobe_path == "/path/to/ffprobe"
-        mock_subprocess_run.assert_called_once_with(
-            ["ffdl", "install"], input=b"y\n", check=True
-        )
+        mock_subprocess_run.assert_called_once_with(["ffdl", "install"], input=b"y\n", check=True)
 
 
 def test_install_ffmpeg_file_not_found(mock_subprocess_run):
@@ -90,9 +86,7 @@ def test_install_ffmpeg_non_zero_exit(mock_subprocess_run):
 
 def test_video_downsampling_init():
     """Test initialization of VideoDownsamplingStep."""
-    step = VideoDownsamplingStep(
-        output_fps=15, output_resolution="1280x720", output_format="webm", name="TestStep"
-    )
+    step = VideoDownsamplingStep(output_fps=15, output_resolution="1280x720", output_format="webm", name="TestStep")
     assert step.output_fps == 15
     assert step.output_resolution == "1280x720"
     assert step.output_format == "webm"
@@ -152,6 +146,7 @@ def test_process_step_same_fps(mock_path_isfile, mock_subprocess_run, video_down
 
 from pathlib import Path
 
+
 def test_process_step_downsample(mock_path_isfile, mock_subprocess_run, video_downsampling_step):
     """Test _process_step with actual downsampling."""
     mock_path_isfile.return_value = True
@@ -164,9 +159,7 @@ def test_process_step_downsample(mock_path_isfile, mock_subprocess_run, video_do
         MagicMock(returncode=0, stdout="success", stderr=""),  # FFmpeg for downsampling
     ]
     data = {"video_path": "/path/to/video.mp4"}
-    with patch.object(
-        video_downsampling_step, "_downsample_video"
-    ) as mock_downsample:
+    with patch.object(video_downsampling_step, "_downsample_video") as mock_downsample:
         result = video_downsampling_step._process_step(data)
         # Normalize the result path to use forward slashes for comparison
         assert Path(result["video_path"]).as_posix() == "/path/to/video_downsampled.mp4"
@@ -185,9 +178,7 @@ def test_downsample_video_cpu(mock_subprocess_run, video_downsampling_step):
         MagicMock(returncode=0, stdout="auto", stderr=""),  # FFmpeg -hwaccels
         MagicMock(returncode=0, stdout="success", stderr=""),  # FFmpeg downsample
     ]
-    video_downsampling_step._downsample_video(
-        "/path/to/input.mp4", "/path/to/output.mp4", 10, "640x480", "mp4"
-    )
+    video_downsampling_step._downsample_video("/path/to/input.mp4", "/path/to/output.mp4", 10, "640x480", "mp4")
     assert mock_subprocess_run.call_count == 2
     cmd = mock_subprocess_run.call_args_list[1][0][0]
     assert "libx264" in cmd
@@ -202,9 +193,7 @@ def test_downsample_video_gpu(mock_subprocess_run, video_downsampling_step):
         MagicMock(returncode=0, stdout="cuda", stderr=""),  # FFmpeg -hwaccels
         MagicMock(returncode=0, stdout="success", stderr=""),  # FFmpeg downsample
     ]
-    video_downsampling_step._downsample_video(
-        "/path/to/input.mp4", "/path/to/output.mp4", 10, "640x480", "mp4"
-    )
+    video_downsampling_step._downsample_video("/path/to/input.mp4", "/path/to/output.mp4", 10, "640x480", "mp4")
     assert mock_subprocess_run.call_count == 2
     cmd = mock_subprocess_run.call_args_list[1][0][0]
     assert "h264_nvenc" in cmd
@@ -219,9 +208,7 @@ def test_downsample_video_webm(mock_subprocess_run, video_downsampling_step):
         MagicMock(returncode=0, stdout="cuda", stderr=""),  # FFmpeg -hwaccels
         MagicMock(returncode=0, stdout="success", stderr=""),  # FFmpeg downsample
     ]
-    video_downsampling_step._downsample_video(
-        "/path/to/input.mp4", "/path/to/output.webm", 10, "640x480", "webm"
-    )
+    video_downsampling_step._downsample_video("/path/to/input.mp4", "/path/to/output.webm", 10, "640x480", "webm")
     assert mock_subprocess_run.call_count == 2
     cmd = mock_subprocess_run.call_args_list[1][0][0]
     assert "libvpx-vp9" in cmd
@@ -236,6 +223,4 @@ def test_downsample_video_failure(mock_subprocess_run, video_downsampling_step):
         subprocess.CalledProcessError(1, cmd="ffmpeg", stderr="FFmpeg error"),
     ]
     with pytest.raises(RuntimeError, match="FFmpeg failed"):
-        video_downsampling_step._downsample_video(
-            "/path/to/input.mp4", "/path/to/output.mp4", 10, "640x480", "mp4"
-        )
+        video_downsampling_step._downsample_video("/path/to/input.mp4", "/path/to/output.mp4", 10, "640x480", "mp4")

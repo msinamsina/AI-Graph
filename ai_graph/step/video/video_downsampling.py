@@ -11,7 +11,7 @@ import subprocess
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 import ffmpeg_downloader as ffdl
 
@@ -20,7 +20,7 @@ from ai_graph.step.base import BasePipelineStep
 logger = logging.getLogger(__name__)
 
 
-def check_ffmpeg_availability():
+def check_ffmpeg_availability() -> Tuple[str, str]:
     """
     Checks if FFmpeg and FFprobe are available on the system. If not, attempts to install them using ffmpeg-downloader.
 
@@ -40,7 +40,7 @@ def check_ffmpeg_availability():
         return install_ffmpeg()
 
 
-def install_ffmpeg():
+def install_ffmpeg() -> Tuple[str, str]:
     """
     Runs the 'ffdl install' command to install FFmpeg and FFprobe, automatically answering 'y' to the confirmation prompt.
 
