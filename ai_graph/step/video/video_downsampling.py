@@ -8,13 +8,73 @@ frames-per-second (FPS) rate, resolution, and/or format using FFmpeg.
 import logging
 import os
 import subprocess
+import sys
 import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-from ..base import BasePipelineStep
+import ffmpeg_downloader as ffdl
+
+from ai_graph.step.base import BasePipelineStep
 
 logger = logging.getLogger(__name__)
+
+
+def check_ffmpeg_availability():
+    """
+    Checks if FFmpeg and FFprobe are available on the system. If not, attempts to install them using ffmpeg-downloader.
+
+    Returns:
+        tuple: Paths to ffmpeg and ffprobe executables (e.g., "ffmpeg", "ffprobe" if available, or paths from ffdl).
+
+    Raises:
+        SystemExit: If FFmpeg or FFprobe cannot be found or installed.
+    """
+    try:
+        # Check if ffmpeg and ffprobe are available
+        subprocess.run(["ffmpeg", "-version"], capture_output=True, check=True)
+        subprocess.run(["ffprobe", "-version"], capture_output=True, check=True)
+        return "ffmpeg", "ffprobe"
+    except (FileNotFoundError, subprocess.CalledProcessError):
+        logger.warning("FFmpeg or FFprobe not found. Attempting to install via ffmpeg-downloader...")
+        return install_ffmpeg()
+
+
+def install_ffmpeg():
+    """
+    Runs the 'ffdl install' command to install FFmpeg and FFprobe, automatically answering 'y' to the confirmation prompt.
+
+    Returns:
+        tuple: Paths to the installed ffmpeg and ffprobe executables.
+
+    Raises:
+        SystemExit: If the installation fails or ffmpeg-downloader is not available.
+    """
+    print("Attempting to run 'ffdl install'...")
+    command = ["ffdl", "install"]
+    input_data = b"y\n"
+
+    try:
+        process = subprocess.run(command, input=input_data, check=True)
+        print("\n-------------------------------------------")
+        if process.returncode == 0:
+            print("✅ 'ffdl install' command completed successfully.")
+            return ffdl.ffmpeg_path, ffdl.ffprobe_path
+        else:
+            print(f"⚠️ Command finished with a non-zero exit code: {process.returncode}")
+            sys.exit(1)
+    except FileNotFoundError:
+        print("\n-------------------------------------------")
+        print("❌ Error: 'ffdl' command not found.")
+        print("   Please make sure 'ffmpeg-downloader' is installed correctly")
+        print("   and that its scripts directory is in your system's PATH.")
+        sys.exit(1)
+    except subprocess.CalledProcessError as e:
+        print("\n-------------------------------------------")
+        print(f"❌ An error occurred while running the command: {e}")
+        print("   The command returned a non-zero exit code, indicating failure.")
+        sys.exit(1)
+
 
 class VideoDownsamplingStep(BasePipelineStep):
     """
@@ -68,10 +128,11 @@ class VideoDownsamplingStep(BasePipelineStep):
         self.output_fps = output_fps
         self.output_resolution = output_resolution
         self.output_format = output_format
+        self.ffmpeg_path, self.ffprobe_path = check_ffmpeg_availability()
 
     def _get_video_fps(self, video_path: str) -> float:
         """
-        Retrieves the FPS of the input video using FFmpeg.
+        Retrieves the FPS of the input video using FFprobe.
 
         Args:
             video_path (str): Path to the input video file.
@@ -80,17 +141,18 @@ class VideoDownsamplingStep(BasePipelineStep):
             float: The frames-per-second of the video.
 
         Raises:
-            RuntimeError: If FFmpeg fails to retrieve the FPS.
+            RuntimeError: If FFprobe fails to retrieve the FPS.
         """
         try:
-            cmd = f'ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of json "{video_path}"'
+            cmd = f'"{self.ffprobe_path}" -v error -select_streams v:0 -show_entries stream=r_frame_rate -of json "{video_path}"'
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             if result.returncode != 0:
                 raise RuntimeError(f"FFprobe failed to retrieve FPS: {result.stderr}")
             import json
+
             data = json.loads(result.stdout)
-            fps_str = data['streams'][0]['r_frame_rate']
-            num, denom = map(int, fps_str.split('/'))
+            fps_str = data["streams"][0]["r_frame_rate"]
+            num, denom = map(int, fps_str.split("/"))
             return num / denom
         except Exception as e:
             logger.error(f"Error retrieving FPS for {video_path}: {e}")
@@ -132,7 +194,7 @@ class VideoDownsamplingStep(BasePipelineStep):
         if not video_path or not os.path.isfile(video_path):
             raise FileNotFoundError(f"Invalid video path: {video_path}")
 
-        # Get original fps using FFmpeg
+        # Get original fps using FFprobe
         original_fps = self._get_video_fps(video_path)
         logger.info(f"Original FPS: {original_fps:.2f}")
         logger.info(f"Target FPS: {self.output_fps}")
@@ -214,7 +276,7 @@ class VideoDownsamplingStep(BasePipelineStep):
         """
         try:
             # Check for NVIDIA GPU availability using FFmpeg
-            cmd = "ffmpeg -hide_banner -hwaccels"
+            cmd = f'"{self.ffmpeg_path}" -hide_banner -hwaccels'
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             use_gpu = "cuda" in result.stdout.lower()
 
@@ -237,20 +299,20 @@ class VideoDownsamplingStep(BasePipelineStep):
                 video_codec_cpu = "libx264"
             # Add more format-codec mappings as needed
 
-            # Ensure output_path uses POSIX-style separators for ffmpeg
+            # Ensure output_path uses POSIX-style separators for FFmpeg
             ffmpeg_output_path = Path(output_path).as_posix()
 
             if use_gpu:
                 logger.info("NVIDIA GPU detected - using hardware acceleration for FFmpeg")
                 cmd = (
-                    f'ffmpeg -hwaccel cuda -i "{input_path}" {vf_param} '
+                    f'"{self.ffmpeg_path}" -hwaccel cuda -i "{input_path}" {vf_param} '
                     f"-c:v {video_codec_gpu} -preset fast -c:a copy "
                     f'-max_muxing_queue_size 9999 -y "{ffmpeg_output_path}"'
                 )
             else:
                 logger.info("No NVIDIA GPU detected - using CPU for FFmpeg")
                 cmd = (
-                    f'ffmpeg -i "{input_path}" {vf_param} '
+                    f'"{self.ffmpeg_path}" -i "{input_path}" {vf_param} '
                     f"-c:v {video_codec_cpu} -preset fast -c:a copy "
                     f'-max_muxing_queue_size 9999 -y "{ffmpeg_output_path}"'
                 )
