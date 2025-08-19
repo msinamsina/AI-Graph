@@ -29,6 +29,7 @@ requires-python = ">=3.9"
 dependencies = [
     "opencv-python-headless",
     "tqdm>=4.64.0",
+    "ffmpeg_downloader"
 ]
 
 [project.urls]
