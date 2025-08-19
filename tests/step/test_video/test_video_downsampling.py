@@ -1,5 +1,4 @@
 import json
-import os
 import subprocess
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -104,12 +103,19 @@ def test_get_video_fps_success(mock_subprocess_run, video_downsampling_step):
     )
     fps = video_downsampling_step._get_video_fps("/path/to/video.mp4")
     assert fps == 30.0
-    mock_subprocess_run.assert_called_once_with(
-        f'"{video_downsampling_step.ffprobe_path}" -v error -select_streams v:0 -show_entries stream=r_frame_rate -of json "/path/to/video.mp4"',
-        shell=True,
-        capture_output=True,
-        text=True,
-    )
+
+
+mock_subprocess_run.assert_called_once_with(
+    (
+        f'"{video_downsampling_step.ffprobe_path}" '
+        "-v error -select_streams v:0 "
+        "-show_entries stream=r_frame_rate -of json "
+        '"/path/to/video.mp4"'
+    ),
+    shell=True,
+    capture_output=True,
+    text=True,
+)
 
 
 def test_get_video_fps_failure(mock_subprocess_run, video_downsampling_step):
@@ -142,9 +148,6 @@ def test_process_step_same_fps(mock_path_isfile, mock_subprocess_run, video_down
     assert result["video_fps"] == 10.0
     assert result["output_resolution"] == "640x480"
     assert result["output_format"] == "mp4"
-
-
-from pathlib import Path
 
 
 def test_process_step_downsample(mock_path_isfile, mock_subprocess_run, video_downsampling_step):

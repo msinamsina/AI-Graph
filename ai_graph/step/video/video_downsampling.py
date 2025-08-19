@@ -42,7 +42,8 @@ def check_ffmpeg_availability() -> Tuple[str, str]:
 
 def install_ffmpeg() -> Tuple[str, str]:
     """
-    Runs the 'ffdl install' command to install FFmpeg and FFprobe, automatically answering 'y' to the confirmation prompt.
+    Runs the 'ffdl install' command to install FFmpeg and FFprobe,
+    automatically answering 'y' to the confirmation prompt.
 
     Returns:
         tuple: Paths to the installed ffmpeg and ffprobe executables.
@@ -144,7 +145,8 @@ class VideoDownsamplingStep(BasePipelineStep):
             RuntimeError: If FFprobe fails to retrieve the FPS.
         """
         try:
-            cmd = f'"{self.ffprobe_path}" -v error -select_streams v:0 -show_entries stream=r_frame_rate -of json "{video_path}"'
+            cmd = f'"{self.ffprobe_path}" -v error -select_streams v:0 -show_entries "'
+            'stream=r_frame_rate -of json "{video_path}"'
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             if result.returncode != 0:
                 raise RuntimeError(f"FFprobe failed to retrieve FPS: {result.stderr}")
