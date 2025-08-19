@@ -2,7 +2,7 @@
 Video Downsampling Step.
 
 This module provides a pipeline step for downsampling a video to a specified
-frames-per-second (FPS) rate.
+frames-per-second (FPS) rate, resolution, and/or format using FFmpeg.
 """
 
 import logging
@@ -12,13 +12,9 @@ import time
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import cv2
-import torch
-
 from ..base import BasePipelineStep
 
 logger = logging.getLogger(__name__)
-
 
 class VideoDownsamplingStep(BasePipelineStep):
     """
@@ -29,24 +25,24 @@ class VideoDownsamplingStep(BasePipelineStep):
     next to the original file with a '_downsampled' suffix, along with
     resolution and FPS information if provided. It uses FFmpeg for the
     conversion and can leverage GPU acceleration (NVIDIA's NVENC) if a
-    compatible GPU and CUDA are detected.
+    compatible GPU is detected via FFmpeg.
 
     Examples:
-       # Example 1: Downsample to 15 FPS
-       downsample_fps_step = VideoDownsamplingStep(output_fps=15)
+        # Example 1: Downsample to 15 FPS
+        downsample_fps_step = VideoDownsamplingStep(output_fps=15)
 
-       # Example 2: Downsample to 720p resolution
-       downsample_res_step = VideoDownsamplingStep(output_resolution="1280x720")
+        # Example 2: Downsample to 720p resolution
+        downsample_res_step = VideoDownsamplingStep(output_resolution="1280x720")
 
-       # Example 3: Convert to WebM format
-       convert_format_step = VideoDownsamplingStep(output_format="webm")
+        # Example 3: Convert to WebM format
+        convert_format_step = VideoDownsamplingStep(output_format="webm")
 
-       # Example 4: Downsample to 10 FPS, 480p resolution, and MP4 format
-       full_downsample_step = VideoDownsamplingStep(
-           output_fps=10,
-           output_resolution="640x480",
-           output_format="mp4"
-       )
+        # Example 4: Downsample to 10 FPS, 480p resolution, and MP4 format
+        full_downsample_step = VideoDownsamplingStep(
+            output_fps=10,
+            output_resolution="640x480",
+            output_format="mp4"
+        )
     """
 
     def __init__(
@@ -73,6 +69,33 @@ class VideoDownsamplingStep(BasePipelineStep):
         self.output_resolution = output_resolution
         self.output_format = output_format
 
+    def _get_video_fps(self, video_path: str) -> float:
+        """
+        Retrieves the FPS of the input video using FFmpeg.
+
+        Args:
+            video_path (str): Path to the input video file.
+
+        Returns:
+            float: The frames-per-second of the video.
+
+        Raises:
+            RuntimeError: If FFmpeg fails to retrieve the FPS.
+        """
+        try:
+            cmd = f'ffprobe -v error -select_streams v:0 -show_entries stream=r_frame_rate -of json "{video_path}"'
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            if result.returncode != 0:
+                raise RuntimeError(f"FFprobe failed to retrieve FPS: {result.stderr}")
+            import json
+            data = json.loads(result.stdout)
+            fps_str = data['streams'][0]['r_frame_rate']
+            num, denom = map(int, fps_str.split('/'))
+            return num / denom
+        except Exception as e:
+            logger.error(f"Error retrieving FPS for {video_path}: {e}")
+            raise RuntimeError(f"Failed to retrieve FPS: {e}")
+
     def _process_step(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """
         Downsamples the video specified in the input data.
@@ -93,13 +116,13 @@ class VideoDownsamplingStep(BasePipelineStep):
 
         Raises:
             FileNotFoundError: If the video_path is not found or is invalid.
-            RuntimeError: If FFmpeg fails to open or process the video.
+            RuntimeError: If FFmpeg fails to process the video.
 
         Example:
             >>> from ai_graph.step.video.video_downsampling import VideoDownsamplingStep
             >>> step = VideoDownsamplingStep(output_fps=10, output_resolution="640x480", output_format="mp4")
             >>> data = {"video_path": "/path/to/your/video.mp4"}
-            >>> # For a runnable example, you would need to mock os.path.isfile, cv2.VideoCapture, and subprocess.run
+            >>> # For a runnable example, you would need to mock os.path.isfile and subprocess.run
             >>> # processed_data = step._process_step(data)
             >>> # print(processed_data["video_path"])
             # Expected output (if mocks were in place):
@@ -109,17 +132,12 @@ class VideoDownsamplingStep(BasePipelineStep):
         if not video_path or not os.path.isfile(video_path):
             raise FileNotFoundError(f"Invalid video path: {video_path}")
 
-        # Get original fps
-        cap = cv2.VideoCapture(video_path)
-        if not cap.isOpened():
-            raise RuntimeError(f"Failed to open video: {video_path}")
-        original_fps = cap.get(cv2.CAP_PROP_FPS)
-        cap.release()
-
+        # Get original fps using FFmpeg
+        original_fps = self._get_video_fps(video_path)
         logger.info(f"Original FPS: {original_fps:.2f}")
         logger.info(f"Target FPS: {self.output_fps}")
 
-        if self.output_fps is not None and original_fps == self.output_fps:
+        if self.output_fps is not None and abs(original_fps - self.output_fps) < 0.01:
             logger.info("Original FPS and Target FPS are the same. Skipping downsampling.")
             data["output_fps"] = self.output_fps
             data["video_fps"] = original_fps
@@ -131,7 +149,6 @@ class VideoDownsamplingStep(BasePipelineStep):
 
         # Construct output filename based on provided parameters
         output_stem = video_p.stem + "_downsampled"
-
         output_suffix = f".{self.output_format}" if self.output_format else video_p.suffix
         output_path = str(video_p.with_name(f"{output_stem}{output_suffix}"))
 
@@ -164,9 +181,9 @@ class VideoDownsamplingStep(BasePipelineStep):
         Performs the video downsampling using FFmpeg.
 
         This method constructs and executes an FFmpeg command to change the video's
-        FPS and/or resolution. It automatically selects hardware acceleration (h264_nvenc) if a
-        CUDA-enabled GPU is available, otherwise, it falls back to CPU-based
-        encoding (libx264).
+        FPS and/or resolution. It checks for NVIDIA GPU availability using FFmpeg's
+        hardware acceleration capabilities and uses 'h264_nvenc' if available,
+        otherwise falls back to CPU-based encoding ('libx264').
 
         Args:
             input_path (str): The path to the input video file.
@@ -181,25 +198,25 @@ class VideoDownsamplingStep(BasePipelineStep):
         Example:
             >>> # This example assumes ffmpeg is installed and accessible in the system's PATH.
             >>> # It also assumes a dummy video file exists at '/tmp/input_video.mp4'.
-            >>> # Mocking subprocess.run and torch.cuda.is_available would be necessary for a real test.
+            >>> # Mocking subprocess.run would be necessary for a real test.
             >>> from pathlib import Path
             >>> from unittest.mock import patch, MagicMock
             >>> from ai_graph.step.video.video_downsampling import VideoDownsamplingStep
             >>>
             >>> # Mock subprocess.run to prevent actual ffmpeg execution during example run
             >>> with patch('subprocess.run', return_value=MagicMock(returncode=0, stdout="success", stderr="")):
-            >>>     # Mock torch.cuda.is_available to simulate no GPU
-            >>>     with patch('torch.cuda.is_available', return_value=False):
-            >>>         step = VideoDownsamplingStep()
-            >>>         # Instance is not used for _downsample_video directly, but for context
-            >>>         input_path = "/tmp/input_video.mp4"
-            >>>         output_path = "/tmp/output_video_downsampled.mp4"
-            >>>         # Call the static method directly for demonstration
-            >>>         VideoDownsamplingStep._downsample_video(step, input_path, output_path, 15, "640x480", "mp4")
-            >>>         # In a real scenario, you would check if output_video_downsampled.mp4 was created.
+            >>>     step = VideoDownsamplingStep()
+            >>>     input_path = "/tmp/input_video.mp4"
+            >>>     output_path = "/tmp/output_video_downsampled.mp4"
+            >>>     # Call the static method directly for demonstration
+            >>>     VideoDownsamplingStep._downsample_video(step, input_path, output_path, 15, "640x480", "mp4")
+            >>>     # In a real scenario, you would check if output_video_downsampled.mp4 was created.
         """
         try:
-            use_gpu = torch.cuda.is_available()
+            # Check for NVIDIA GPU availability using FFmpeg
+            cmd = "ffmpeg -hide_banner -hwaccels"
+            result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+            use_gpu = "cuda" in result.stdout.lower()
 
             filters = []
             if output_fps is not None:
@@ -224,21 +241,21 @@ class VideoDownsamplingStep(BasePipelineStep):
             ffmpeg_output_path = Path(output_path).as_posix()
 
             if use_gpu:
-                logger.info("GPU detected - using hardware acceleration for ffmpeg")
+                logger.info("NVIDIA GPU detected - using hardware acceleration for FFmpeg")
                 cmd = (
                     f'ffmpeg -hwaccel cuda -i "{input_path}" {vf_param} '
                     f"-c:v {video_codec_gpu} -preset fast -c:a copy "
                     f'-max_muxing_queue_size 9999 -y "{ffmpeg_output_path}"'
                 )
             else:
-                logger.info("No GPU detected - using CPU for ffmpeg")
+                logger.info("No NVIDIA GPU detected - using CPU for FFmpeg")
                 cmd = (
                     f'ffmpeg -i "{input_path}" {vf_param} '
                     f"-c:v {video_codec_cpu} -preset fast -c:a copy "
                     f'-max_muxing_queue_size 9999 -y "{ffmpeg_output_path}"'
                 )
 
-            # Execute the ffmpeg command
+            # Execute the FFmpeg command
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
             # Check for errors
