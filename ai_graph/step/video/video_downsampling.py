@@ -147,7 +147,7 @@ class VideoDownsamplingStep(BasePipelineStep):
         """
         try:
             cmd = (
-                f'"{self.ffprobe_path}" -v error -select_streams v:0 -show_entries stream=r_frame_rate '  # noqa: E231
+                f'"{self.ffprobe_path}" -v error -select_streams v:0 -show_entries stream=r_frame_rate '
                 f'-of json "{video_path}"'
             )
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
