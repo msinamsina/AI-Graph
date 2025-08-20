@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 def check_ffmpeg_availability() -> Tuple[str, str]:
     """
-    Checks if FFmpeg and FFprobe are available on the system. If not, attempts to install them using ffmpeg-downloader.
+    Check if FFmpeg and FFprobe are available on the system. If not, attempt to install them using ffmpeg-downloader.
 
     Returns:
         tuple: Paths to ffmpeg and ffprobe executables (e.g., "ffmpeg", "ffprobe" if available, or paths from ffdl).
@@ -42,7 +42,8 @@ def check_ffmpeg_availability() -> Tuple[str, str]:
 
 def install_ffmpeg() -> Tuple[str, str]:
     """
-    Runs the 'ffdl install' command to install FFmpeg and FFprobe,
+    Run the 'ffdl install' command to install FFmpeg and FFprobe.
+
     automatically answering 'y' to the confirmation prompt.
 
     Returns:
@@ -114,7 +115,7 @@ class VideoDownsamplingStep(BasePipelineStep):
         name: Optional[str] = None,
     ):
         """
-        Initializes the VideoDownsamplingStep.
+        Initialize the VideoDownsamplingStep.
 
         Args:
             output_fps (int): The target frames-per-second for the output video.
@@ -133,7 +134,7 @@ class VideoDownsamplingStep(BasePipelineStep):
 
     def _get_video_fps(self, video_path: str) -> float:
         """
-        Retrieves the FPS of the input video using FFprobe.
+        Retrieve the FPS of the input video using FFprobe.
 
         Args:
             video_path (str): Path to the input video file.
@@ -145,8 +146,10 @@ class VideoDownsamplingStep(BasePipelineStep):
             RuntimeError: If FFprobe fails to retrieve the FPS.
         """
         try:
-            cmd = f'"{self.ffprobe_path}" -v error -select_streams v:0 -show_entries "'
-            'stream=r_frame_rate -of json "{video_path}"'
+            cmd = (
+                f'"{self.ffprobe_path}" -v error -select_streams v:0 -show_entries stream=r_frame_rate '  # noqa: E231
+                f'-of json "{video_path}"'
+            )
             result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
             if result.returncode != 0:
                 raise RuntimeError(f"FFprobe failed to retrieve FPS: {result.stderr}")
@@ -198,7 +201,7 @@ class VideoDownsamplingStep(BasePipelineStep):
 
         # Get original fps using FFprobe
         original_fps = self._get_video_fps(video_path)
-        logger.info(f"Original FPS: {original_fps:.2f}")
+        logger.info(f"Original FPS: {original_fps: .2f}")
         logger.info(f"Target FPS: {self.output_fps}")
 
         if self.output_fps is not None and abs(original_fps - self.output_fps) < 0.01:
@@ -225,7 +228,7 @@ class VideoDownsamplingStep(BasePipelineStep):
             raise
 
         elapsed = time.time() - start_time
-        logger.info(f"Downsampling took {elapsed:.2f} seconds")
+        logger.info(f"Downsampling took {elapsed: .2f} seconds")
 
         data["output_fps"] = self.output_fps
         data["video_fps"] = original_fps
@@ -242,7 +245,7 @@ class VideoDownsamplingStep(BasePipelineStep):
         output_format: Optional[str],
     ) -> None:
         """
-        Performs the video downsampling using FFmpeg.
+        Downsample the video using FFmpeg.
 
         This method constructs and executes an FFmpeg command to change the video's
         FPS and/or resolution. It checks for NVIDIA GPU availability using FFmpeg's
@@ -308,14 +311,14 @@ class VideoDownsamplingStep(BasePipelineStep):
                 logger.info("NVIDIA GPU detected - using hardware acceleration for FFmpeg")
                 cmd = (
                     f'"{self.ffmpeg_path}" -hwaccel cuda -i "{input_path}" {vf_param} '
-                    f"-c:v {video_codec_gpu} -preset fast -c:a copy "
+                    f"-c:v {video_codec_gpu} -preset fast -c:a copy "  # noqa: E231
                     f'-max_muxing_queue_size 9999 -y "{ffmpeg_output_path}"'
                 )
             else:
                 logger.info("No NVIDIA GPU detected - using CPU for FFmpeg")
                 cmd = (
                     f'"{self.ffmpeg_path}" -i "{input_path}" {vf_param} '
-                    f"-c:v {video_codec_cpu} -preset fast -c:a copy "
+                    f"-c:v {video_codec_cpu} -preset fast -c:a copy "  # noqa: E231
                     f'-max_muxing_queue_size 9999 -y "{ffmpeg_output_path}"'
                 )
 
