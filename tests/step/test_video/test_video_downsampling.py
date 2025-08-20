@@ -7,11 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ai_graph.step.video.video_downsampling import (
-    VideoDownsamplingStep,
-    check_ffmpeg_availability,
-    install_ffmpeg,
-)
+from ai_graph.step.video.video_downsampling import VideoDownsamplingStep, check_ffmpeg_availability, install_ffmpeg
 
 
 @pytest.fixture
